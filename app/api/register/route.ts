@@ -25,20 +25,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Password cannot contain special characters" }, { status: 400 });
     }
     const hashedPassword = await bycrpt.hash(password, 10);
-
-    const userUrl = `${process.env.BASE_URL}/login?employeeNumber=${body.employeeNumber}`;
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${userUrl}`;
-
+    
     const result = await db.$transaction(async (prisma) => {
-      const location = await prisma.location.findUnique({
-        where: { id: body.location },
-        select: { id: true }
-      });
-
-      if (!location) {
-        throw new Error("Location not found");
-      }
-
       const user = await prisma.user.create({
         data: {
           name: body.name,
@@ -50,18 +38,12 @@ export async function POST(request: NextRequest) {
       const employee = await prisma.employee.create({
         data: {
           formula: body.formula,
-          qrCode: qrCodeUrl,
           projectedHour: body.projectedHour,
           user: { connect: { id: user.id } },
         },
       });
 
-      await prisma.userLocation.create({
-        data: {
-          userId: user.id,
-          locationId: body.location,
-        },
-      });
+   
 
       return { user, employee };
     }, {

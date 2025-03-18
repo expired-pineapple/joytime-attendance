@@ -2,7 +2,6 @@ export interface Attendance {
   id: string;
   employeeNumber: string;
   employeeName: string;
-  location: string;
   date: string;
   check_in_time: string;
   check_out_time: string;
@@ -32,7 +31,6 @@ export interface timestamp{
 export interface Employee{
     id: string;
     employeeNumber?: string;
-    locations?:string[];
     user: User;
     timestamps: timestamp[]
     formula: string;
@@ -41,41 +39,13 @@ export interface Employee{
     projectedHours: number;
 }
 
-export interface Location{
-  id: string;
-  name: string;
-  image: string;
-  budget: number | null;
-  employees: Employee[]
-}
 
-export interface EmployeePayroll{
-  id: string;
-  employeeId: string;
-  employee: Employee;
-  payrollId: string;
-  payroll: PayrollLocation;
-  projectedHour: number | null;
-  remark: string | null;
-
-}
-
-export interface PayrollLocation{
-  id: string;
-  payrollId: string;
-  payroll: PayrollPeriod;
-  locationId: string;
-  location: Location;
-  budget: number | null;
-  employees: EmployeePayroll[]
-}
 
 
 export interface PayrollPeriod {
   id: string;
   startDate: string | Date;
   endDate: string | Date;
-  locations: PayrollLocation[]
 }
 
 

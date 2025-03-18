@@ -16,45 +16,23 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         await db.$transaction(async (tx) => {
             const existingEmployee = await tx.employee.findUnique({
                 where: { id },
-                include: { user: { include: { location: true } } },
-            });
+                include: { user: true  } },
+            );
 
-            if (!existingEmployee) {
-                throw new Error("Employee not found");
-            }
-
-            const { user: userData, locations, ...employeeData } = body;
+            const { user: userData,  ...employeeData } = body;
             
-            // Prepare user update data
+            
             const userUpdateData: any = {
                 ...userData,
             };
-            const userLocation = userUpdateData.location;
-            delete userUpdateData.location;
-            // Handle locations update
-            if (Array.isArray(userLocation) && userLocation.length > 0) {
-                // First, delete all existing locations for this user
-                await tx.userLocation.deleteMany({
-                    where: { userId: existingEmployee.user.id }
-                });
-
-                // Then, create new locations
-                userUpdateData.location = {
-                    create: userLocation.map((locationId: string) => ({
-                        // @ts-ignore
-                        locationId: locationId.locationId
-                    }))
-                };
+            if( existingEmployee == null){
+                return NextResponse.json({ error: "Employee not found" }, { status: 404 });
             }
-
-            // Update user
+           
             const updatedUser = await tx.user.update({
-                where: { id: existingEmployee.user.id },
+                where: { id: existingEmployee?.userId },
                 data: userUpdateData,
-                include: { location: true }
             });
-
-            // Update employee
             const updatedEmployee = await tx.employee.update({
                 where: { id },
                 data: {
@@ -72,10 +50,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
         return NextResponse.json({ message: "Employee updated successfully" }, { status: 200 });
     } catch (error) {
-        console.error('Error updating employee:', error);
-        if (error instanceof Error && error.message === "Employee not found") {
-            return NextResponse.json({ error: "Employee not found" }, { status: 404 });
-        }
         return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
     }
 }

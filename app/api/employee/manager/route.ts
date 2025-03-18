@@ -17,32 +17,9 @@ export async function POST(request: NextRequest) {
     if (!currentUser.isAdmin) return NextResponse.json({error: "Unauthorized"}, {status: 403});
 
     const body = await request.json();
-    try {
-        await createManagerWithLocations(body);
-        return NextResponse.json({ message: "Manager created successfully" }, { status: 201 });
-    } catch (error) {
-        return handleError(error);
-    }
-}
-
-async function createManagerWithLocations(body: any) {
-
-    const { name, employeeNumber, formula, locations, password } = body;
-
-    // Hash password
+    const { name, employeeNumber, formula, password } = body;
     const hashedPassword = await bycrpt.hash(password, 10);
-
-    return await prisma.$transaction(async (prisma) => {
-        // Check if all locations exist
-        const existingLocations = await prisma.location.findMany({
-            where: { id: { in: locations } }
-        });
-
-        if (existingLocations.length !== locations.length) {
-            throw new Error('One or more invalid locations');
-        }
-
-        // Create the user
+    try {
         const user = await prisma.user.create({
             data: {
                 name: name,
@@ -52,28 +29,10 @@ async function createManagerWithLocations(body: any) {
             },
         });
 
-        // Create UserLocation entries for each location
-        await prisma.userLocation.createMany({
-            data: locations.map((locationId: string) => ({
-                userId: user.id,
-                locationId,
-            })),
-        });
-
-        // Create employee
-        const userUrl = `${process.env.BASE_URL}/login?employeeNumber=${employeeNumber}`;
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(userUrl)}`;
-
-        await prisma.employee.create({
-            data: {
-                formula: formula || "(A+0)",
-                qrCode: qrCodeUrl,
-                userId: user.id,
-            },
-        });
-
-        return { user, password };
-    });
+        return NextResponse.json({ message: "Manager created successfully" }, { status: 201 });
+    } catch (error) {
+        return handleError(error);
+    }
 }
 
 function handleError(error: any) {
@@ -107,15 +66,7 @@ export async function GET(request: NextRequest) {
                 }
             },
             include: {
-                user: {
-                    include:{
-                        location:{
-                            include:{
-                                location:true
-                            }
-                        }
-                    }
-                }
+                user: true
             }
         });
         const e = employees.map(employee => {
@@ -123,7 +74,6 @@ export async function GET(request: NextRequest) {
                 ...employee,
                name: employee.user.name,
                employeeNumber: employee.user.employeeNumber.toUpperCase(),
-               locations: employee.user.location.map(loc => loc.location.name)
             }
         })
         return NextResponse.json(e);

@@ -52,10 +52,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { FiMapPin } from "react-icons/fi";
-import { Location } from "@/app/types";
-import { GoLog } from "react-icons/go";
 import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
+
 
 
 export default function Dashboard() {
@@ -80,9 +78,7 @@ export default function Dashboard() {
     check_out_time: null as string | null,
     remark: null as string | null
   });
-  const [location, setLocation] = useState<Location[]>([]);
-  const [locationLoading, setlocationLoading] = useState(false);
-  const [selectedLocations, setSelectedLocations] = useState([])
+
   const [remark, setRemark] = useState("")
   const [remarkDialog, setRemarkDialog] = useState(false)
   const [remarkId, setRemarkId] = useState("")
@@ -96,18 +92,6 @@ export default function Dashboard() {
     { header: "Duration", key: "duration", width: 30 },
   ];
 
-  const fetchLocationData = async () => {
-    try {
-      const res = await axios.get("/api/configs/location");
-      if (res.status === 200) {
-        setLocation(res.data.locations);
-      }
-    } catch (e: any) {
-     
-    } finally {
-      setlocationLoading(false);
-    }
-  };
 
 
   const exportExcel = async () => {
@@ -130,18 +114,12 @@ export default function Dashboard() {
       setLoading(true);
       let params: any = {};
   
-      // Apply date filter if available
       if (date?.from && date?.to) {
         params.startDate = date.from;
         params.endDate = date.to;
       }
   
-      // Apply location filter if available
-      if (selectedLocations) {
-        params.locations = selectedLocations;
-      }
-  
-      // Make the API call with all applicable params
+    
       const res = await axios.get("/api/employee/attendance/", { params });
   
       if (res.status === 200) {
@@ -330,17 +308,7 @@ const setAttendanceRemark = async ()=>{
   } finally {
     setIdLoading(false);
   }
-
 }
-  const handleLocationChange = (locationId: string) => {
-    setSelectedLocations((prev: any) => {
-      const newSelection = prev.includes(locationId)
-        ? prev.filter((id: string) => id !== locationId)
-        : [...prev, locationId]
-      return newSelection
-    })
-  }
-
 
   const columns: ColumnDef<Attendance>[] = [  
     {
@@ -358,22 +326,6 @@ const setAttendanceRemark = async ()=>{
         );
       },
       cell: ({ row }) => <div className="text-left">{row.getValue("employeeNumber")}</div>,
-    },
-    {
-      accessorKey: "locations",
-  
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-          Location
-            <RxCaretSort className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => <div className="text-left">{row.getValue("locations")}</div>,
     },
     {
       accessorKey: "date",
@@ -494,9 +446,8 @@ const setAttendanceRemark = async ()=>{
 
   useEffect(() => {
       fetchEmployeeData()
-      fetchLocationData()
     
-  }, [date, selectedLocations]);
+  }, [date]);
 
   return (
     <div className="flex h-screen w-full flex-col  mx-auto">
@@ -504,49 +455,15 @@ const setAttendanceRemark = async ()=>{
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="flex items-center">
             <div className="ml-auto flex items-center gap-2">
-              {(isAdmin || isManager) && (
-                            <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" className="w-full">
-                              <FiMapPin className="mr-2 h-4 w-4" />
-                                {selectedLocations.length > 0 
-                                  ? `${selectedLocations.length} selected`
-                                  : "All Locations"}
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 dark:bg-gray-900 dark:text-white">
-                              <DropdownMenuLabel>Locations</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              {locationLoading ? (
-                                <DropdownMenuLabel>Loading...</DropdownMenuLabel>
-                              ) : location.length === 0 ? (
-                                <DropdownMenuLabel>No location found</DropdownMenuLabel>
-                              ) : (
-                                location?.map((group) => (
-                                  <DropdownMenuCheckboxItem
-                                    key={group.id}
-                                    checked={
-                                      // @ts-ignored
-                                      selectedLocations.includes(group.id)}
-                                    onCheckedChange={() => handleLocationChange(group.id)}
-                                  >
-                                    {group.name}
-                                  </DropdownMenuCheckboxItem>
-                                ))
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-              )}
-
             <div className="grid gap-2">
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild className="border-[#865EFD] text-[#865EFD]">
           <Button
             id="date"
             variant={"outline"}
             className={cn(
               "w-[300px] justify-start text-left font-normal",
-              !date && "w-[100px]"
+              !date && "w-[100px] "
             )}
           >
             <IoCalendarOutline className="mr-2 h-4 w-4" />
@@ -560,7 +477,7 @@ const setAttendanceRemark = async ()=>{
                 format(date.from, "LLL dd, y")
               )
             ) : (
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-muted-foreground ">Filter</span>
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-muted-foreground">Filter</span>
             )}
           </Button>
         </PopoverTrigger>
@@ -582,6 +499,8 @@ const setAttendanceRemark = async ()=>{
                 onClick={(e) => {
                   exportExcel();
                 }}
+
+                className="border-[#865EFD] text-[#865EFD]"
               >
               {exportLoading ? (
                       <div className="flex items-center justify-center">
@@ -603,7 +522,7 @@ const setAttendanceRemark = async ()=>{
             <CardHeader>
               <div className="flex justify-between">
                 <div>
-                  <CardTitle>Employee Attendance</CardTitle>
+                  <CardTitle className="text-[#865EFD]">Employee Attendance</CardTitle>
                   <CardDescription>List of attendance records</CardDescription>
                 </div>
                 { (!isAdmin || loading ) && (

@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 
 import axios from 'axios';
-import { Location } from "@/app/types";
 
 
 interface Props {
@@ -40,7 +39,6 @@ const EmployeeEditForm: React.FC<Props> = ({ isManager, id, sheetOpen, onChange,
     user: {
       employeeNumber: "",
       name: "",
-      locationId: ""
     },
     formula: "",
     projectedHour: 0
@@ -48,8 +46,6 @@ const EmployeeEditForm: React.FC<Props> = ({ isManager, id, sheetOpen, onChange,
 
   const [editFetchLoading, setEditFetchLoading] = useState(true);
   const [editEmployeeId, setEditEmployeeId] = useState("");
-  const [editLocation, setEditLocation] = useState<Location[]>([]); 
-  const [editLocationLoading, setEditLocationLoading] = useState(false);
   const [editSuccess, setEditSuccess] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
 
@@ -113,33 +109,6 @@ const EmployeeEditForm: React.FC<Props> = ({ isManager, id, sheetOpen, onChange,
 
 
   }
-
-  
-  const updateLocation = (locationId: string) => {
-    setEditformData((prevData) => ({
-      ...prevData,
-      user: { ...prevData.user, locationId },
-    }));
-  };
-
-
-  useEffect(() => {
-    const fetchLocationData = async () => {
-      setEditLocationLoading(true);
-      try {
-        const response = await fetch('/api/configs/location'); // Replace with your API endpoint
-        const data = await response.json();
-        setEditLocation(data.locations);
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-      } finally {
-        setEditLocationLoading(false);
-      }
-    };
-    fetchLocationData();
-  }, []);
-
-
 
   useEffect(() => {
     if (id) {
@@ -225,36 +194,6 @@ const EmployeeEditForm: React.FC<Props> = ({ isManager, id, sheetOpen, onChange,
               />
             </div>
           </div>
-          {!isManager && (
-            <div className="flex justify-between items-center gap-4">
-              <Label htmlFor="location" className="text-right">
-                Location
-              </Label>
-              <Select
-                onValueChange={(value) => updateLocation(value)}
-                value={editformData.user.locationId}
-              >
-                <SelectTrigger className="w-full bg-transparent">
-                  <SelectValue placeholder={editFetchLoading ? "Loading..." : "Select Location"} />
-                </SelectTrigger>
-                {editLocationLoading ? (
-                  <SelectContent>Loading...</SelectContent>
-                ) : editLocation?.length === 0 ? (
-                  <SelectContent>No location found</SelectContent>
-                ) :  (
-                  <SelectContent className="dark:bg-gray-900 dark:text-white">
-                    {editLocation?.map((group) => (
-                      <SelectGroup key={group.id}>
-                        <SelectItem value={group.id}>{group.name}</SelectItem>
-                      </SelectGroup>
-                    
-                    ))}
-                  </SelectContent>
-                ) 
-                }
-              </Select>
-            </div>
-          )}
           <div className="grid grid-cols-4 items-center gap-4 my-4">
             <Label htmlFor="formula" className="text-right">
               Formula

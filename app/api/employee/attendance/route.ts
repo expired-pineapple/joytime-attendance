@@ -28,11 +28,7 @@
                 select: { 
                   employeeNumber: true,
                   name: true,
-                  location: {
-                   include:{
-                    location:true
-                   }
-                  }
+                 
                 } 
               }
             } 
@@ -61,7 +57,6 @@
   async function buildQueryConditions(query: URLSearchParams, user: any) {
     const filterStartDate = query.get("startDate");
     const filterEndDate = query.get("endDate");
-    const filterLocations = query.getAll("locations[]");
     const filter = query.get("filter")?.toLowerCase();
   
     let dateFilter: any = {};
@@ -79,44 +74,8 @@
     }
   
     let whereCondition: any = { date: dateFilter };
-    
-    if (filterLocations.length > 0) {
-      whereCondition.employee = {
-        user: {
-          location: {
-            some: {
-              locationId: {
-                in: filterLocations
-              }
-            }
-          }
-        }
-      };
-    }
-    
-    if (!user.isAdmin) {
-      if (user.isManager) {
-        const managerLocations = await db.userLocation.findMany({
-          where: { userId: user.id },
-          select: { locationId: true }
-        });
-        const locationIds = managerLocations.map(loc => loc.locationId);
-        
-        whereCondition.employee = {
-          user: {
-            location: {
-              some: {
-                locationId: {
-                  in: locationIds
-                }
-              }
-            }
-          }
-        };
-      } else {
-        whereCondition.employee = { userId: user.id };
-      }
-    }
+
+
   
     return { dateFilter, whereCondition };
   }
@@ -155,7 +114,6 @@
         check_out_time,
         employeeName: attendance.employee.user.name,
         duration,
-        locations: attendance.employee.user.location[0].location.name,
         edited: attendance.edited,
         remark: attendance.remark 
       };

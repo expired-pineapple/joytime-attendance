@@ -55,7 +55,7 @@ import { MdErrorOutline } from "react-icons/md";
 import { useToast } from "@/components/ui/use-toast";
 import ManagerEditForm from "@/app/components/managerEdit";
 
-import { Employee, Location } from "@/app/types";
+import { Employee } from "@/app/types";
 
 
 
@@ -65,11 +65,11 @@ export default function Manager() {
   const [formData, setFormData] = useState({
     employeeNumber: "",
     name: "",
-    locations:[],
+
     formula:"",
     password:""
   });
-  const [selectedLocations, setSelectedLocations] = useState(formData.locations || [])
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteEmployeeId, setDeleteEmployeeId] = useState("");
   const [editFetchLoading, setEditFetchLoading] = useState(true);
@@ -117,27 +117,12 @@ export default function Manager() {
   }
   }
 
-  const handleLocationChange = (locationId: string) => {
-    setSelectedLocations((prev: any) => {
-      const newSelection = prev.includes(locationId)
-        ? prev.filter((id: string) => id !== locationId)
-        : [...prev, locationId]
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        locations: newSelection,
-      }))
-
-      return newSelection
-    })
-  }
 
   const [saveError, setSaveError] = useState(false);
   const [saveErrorMessage, setSaveErrorMessage] = useState("");
-  const [location, setLocation] = useState<Location[]>([]);
   const [data, setData] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
-  const [locationLoading, setlocationLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [success, setSuccess] = useState(false);
 
@@ -145,7 +130,6 @@ export default function Manager() {
   const [editformData, setEditformData] = useState({
     employeeNumber: "",
     name: "",
-    locations:[],
     formula:""
   });
 
@@ -190,23 +174,6 @@ export default function Manager() {
     }
   };
 
-  const fetchLocationData = async () => {
-    try {
-      const res = await axios.get("/api/configs/location");
-      if (res.status === 200) {
-        setLocation(res.data.locations);
-      }
-      else if(res.status === 401){
-        window.location.href = "/login";
-      }
-    } catch (e: any) {
-      if(e.response.status === 401){
-        window.location.href = "/login";
-      }
-    } finally {
-      setlocationLoading(false);
-    }
-  };
 
 
   const saveUserData = async (e: any) => {
@@ -218,7 +185,6 @@ export default function Manager() {
         setFormData({
           employeeNumber: "",
           name: "",
-          locations:[],
           formula:"",
           password:""
         });
@@ -340,34 +306,7 @@ const deleteEmployee = async () => {
       },
       cell: ({ row }) => <div className="text-left">{row.getValue("name")}</div>,
     },
-    {
-      accessorKey: "location",
-  
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="text-left"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-          Location
-            <RxCaretSort className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) =>{
-        const locations = row.original.locations
-        return <div className="flex flex-col sm:flex-row gap-2">
-        {
-          locations?.map((l:string, index)=>{
-            return <div key={index}>{l}</div>
-          })
-        }
-        </div>
-        
-      }
-
-    },
+   
     {
       accessorKey: "status",
       header: () => <div className="text-center">Status</div>,
@@ -430,7 +369,6 @@ const deleteEmployee = async () => {
 
 
   useEffect(() => {
-    fetchLocationData();
     fetchEmployeeData();
   }, []);
 
@@ -513,41 +451,6 @@ const deleteEmployee = async () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center mb-4 gap-4">
-      <Label htmlFor="locations" className="text-right">
-        Locations
-      </Label>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-full bg-transparent">
-            {selectedLocations.length > 0 
-              ? `${selectedLocations.length} selected`
-              : "Select locations"}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56 dark:bg-gray-900 dark:text-white">
-          <DropdownMenuLabel>Locations</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {locationLoading ? (
-            <DropdownMenuLabel>Loading...</DropdownMenuLabel>
-          ) : location.length === 0 ? (
-            <DropdownMenuLabel>No location found</DropdownMenuLabel>
-          ) : (
-            location.map((group) => (
-              <DropdownMenuCheckboxItem
-                key={group.id}
-                checked={
-                  // @ts-ignored
-                  selectedLocations.includes(group.id)}
-                onCheckedChange={() => handleLocationChange(group.id)}
-              >
-                {group.name}
-              </DropdownMenuCheckboxItem>
-            ))
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
 
     <div className="grid grid-cols-4 items-center gap-4 my-4">
 <Label htmlFor="formula" className="text-right">

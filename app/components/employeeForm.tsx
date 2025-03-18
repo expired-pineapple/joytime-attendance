@@ -18,14 +18,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import useRegisterEmployee  from '@/app/hooks/useRegisterEmployee'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectGroup,
-    SelectValue,
-  } from "@/components/ui/select"
 import { GoEye, GoEyeClosed } from "react-icons/go";
 
 
@@ -46,36 +38,16 @@ const EmployeeForm: React.FC<Props> = ({isManager, onSuccess}) => {
         loading,
         saveUserData,
       } = useRegisterEmployee();
-      const [location, setLocation] = useState<Location[]>([]);
       const [showPassword, setShowPassword] = useState(false);
-      const [locationLoading, setLocationLoading] = useState(false);
       const onSubmit = async(e: FormEvent<HTMLFormElement> | undefined) =>{
         saveUserData(e)
       }
 
-      useEffect(() => {
-        const fetchLocationData = async () => {
-          setLocationLoading(true);
-          try {
-            const response = await fetch('/api/configs/location');
-            const data = await response.json();
-            setLocation(data.locations); // This assumes data is an array of Location objects
-          } catch (error) {
-            console.error('Error fetching locations:', error);
-          } finally {
-            setLocationLoading(false);
-          }
-        };
-        if(success){
-          onSuccess()
-        }
-        fetchLocationData();
-      }, [success]);
     
     return(
         <Sheet>
         <SheetTrigger asChild>
-          <Button size="sm" className="h-7 gap-1">
+          <Button size="sm" className="h-7 gap-1 bg-[#865EFD]">
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
               Add Employee
@@ -164,41 +136,6 @@ const EmployeeForm: React.FC<Props> = ({isManager, onSuccess}) => {
                 />
               </div>
             </div>
-                <div className="flex justify-between items-center gap-4">
-                <Label htmlFor="location" className="text-right">
-                  Location
-                </Label>
-                <Select
-onValueChange={(value) => setFormData((prevFormData) => ({
-...prevFormData,
-location: value,
-}))}
-defaultValue={formData.location as string}
-
->
-<SelectTrigger className="w-full bg-transparent">
-<SelectValue placeholder="Select location" />
-</SelectTrigger>
-{locationLoading ? (
-<SelectContent>Loading...</SelectContent>
-) : location?.length === 0 ? (
-<SelectContent>No location found</SelectContent>
-) : Array.isArray(location) ?  (
-<SelectContent className="dark:bg-gray-900 dark:text-white">
-  {location?.map((group: any) => (
-    <SelectGroup key={group.id}>
-      <SelectItem
-        value={group.id}
-      >
-        {group.name}
-      </SelectItem>
-    </SelectGroup>
-  ))}
-</SelectContent>) : (
-  <SelectContent>{location}</SelectContent>
-)}
-</Select>
-</div>
             <div className="grid grid-cols-4 items-center gap-4 my-4">
 <Label htmlFor="formula" className="text-right">
 Formula

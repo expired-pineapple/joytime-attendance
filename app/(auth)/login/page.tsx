@@ -154,7 +154,7 @@ const [showPassword, setShowPassword] = useState(false);
       <span className="text-red-500 font-semibold text-sm">{errors.password}</span>
     )}
                </div>
-              <button type="submit" className="bg-[#021044] w-full p-2 text-white font-medium rounded" disabled={loading || employeeNumber.length ==0 || password.length == 0}
+              <button type="submit" className="bg-[#2c0f84] w-full p-2 text-white font-medium rounded" disabled={loading || employeeNumber.length ==0 || password.length == 0}
               >
                 {loading ? (
                   <div className="flex items-center justify-center">

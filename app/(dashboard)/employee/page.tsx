@@ -61,9 +61,7 @@ export default function Dashboard() {
     user: {
       employeeNumber: "",
       name: "",
-      locationId: ""
     },
-    locationId: "",
     formula: "",
     projectedHour: 0
   });
@@ -195,7 +193,6 @@ export default function Dashboard() {
   const excel_columns = [
     { header: "Employee Number", key: "employeeNumber", width: 30 },
     { header: "Name", key: "name", width: 30 },
-    { header: "Location", key: "location", width: 30 },
     { header: "Formula", key: "formula", width: 30 },
     { header: "Projected Hour", key: "projectedHour", width: 30 },
   ];
@@ -235,20 +232,7 @@ export default function Dashboard() {
       ),
       cell: ({ row }) => <div className="text-left">{row.getValue("name")}</div>,
     },
-    {
-      accessorKey: "location",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          className="text-left"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Location
-          <RxCaretSort className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => <div className="text-left">{row.getValue("location")}</div>,
-    },
+    
     {
       accessorKey: "status",
       header: () => <div className="text-center">Status</div>,

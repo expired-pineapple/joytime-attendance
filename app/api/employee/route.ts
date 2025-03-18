@@ -16,44 +16,18 @@ export async function GET(request: NextRequest) {
         }
       };
 
-      const locations = await db.userLocation.findMany({
-        where: { userId: user.id },
-        select: { locationId: true }
-      });
-        
-      if (user.isManager) {  
-        whereCondition.user.location = {
-          some:{
-              locationId: {
-              in: locations.map((l)=>{
-                  return l.locationId
-              })
-          }
-          }
-      }
-      }
-      
       const employees = await db.employee.findMany({
         where:whereCondition,
         include: {
-          user: {
-            include: {
-              location: {
-                include: {
-                  location: true
-                }
-              }
-            }
-          },
-          
+          user:true
         }
-      });
+          
+        });
   
       const formattedEmployees = employees.map(employee => ({
         ...employee,
         name: employee.user.name,
-        employeeNumber: employee.user.employeeNumber.toUpperCase(),
-        location: employee.user.location[0]?.location.name || 'No location'
+        employeeNumber: employee.user.employeeNumber.toUpperCase()
       }));
   
       return NextResponse.json({

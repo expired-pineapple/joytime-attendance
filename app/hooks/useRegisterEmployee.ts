@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import validateFormula from '@/lib/validateFormula'
-import { Location } from "@/app/types";
 import axios from 'axios'
 
 const useRegisterEmployee = (initialFormData = {}) => {
   const [formData, setFormData] = useState({
     employeeNumber: "",
     name: "",
-    location:"",
     formula:"",
     projectedHour:0,
     password:""
@@ -17,8 +15,6 @@ const useRegisterEmployee = (initialFormData = {}) => {
   const [saveErrorMessage, setSaveErrorMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<Location[]>([]); 
-  const [locationLoading, setLocationLoading] = useState(false);
 
   const saveUserData = async (e: any) => {
     e.preventDefault();
@@ -38,7 +34,6 @@ const useRegisterEmployee = (initialFormData = {}) => {
         setFormData({
           employeeNumber: "",
           name: "",
-          location:formData.location,
           formula:"",
           projectedHour:0,
           password:""
@@ -74,22 +69,6 @@ const useRegisterEmployee = (initialFormData = {}) => {
     }
   };
 
- 
-  useEffect(() => {
-    const fetchLocationData = async () => {
-      setLocationLoading(true);
-      try {
-        const response = await fetch('/api/configs/location'); // Replace with your API endpoint
-        const data = await response.json();
-        setLocation(data.locations);
-      } catch (error) {
-        
-      } finally {
-        setLocationLoading(false);
-      }
-    };
-    fetchLocationData();
-  }, []);
 
   return {
     formData,
@@ -98,8 +77,6 @@ const useRegisterEmployee = (initialFormData = {}) => {
     saveErrorMessage,
     success,
     loading,
-    location,
-    locationLoading,
     saveUserData,
   };
 };

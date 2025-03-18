@@ -22,7 +22,6 @@ export default async function getCurrentUser() {
       },
       include:{
         employee: true,
-        location: true
       }
 
     });

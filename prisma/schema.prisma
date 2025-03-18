@@ -23,31 +23,23 @@ model User {
   isAdmin              Boolean        @default(false)
   isManager            Boolean        @default(false)
   employee             Employee?
-  location             UserLocation[]
   isBanned             Boolean        @default(false)
 }
 
-model UserLocation {
-  id         String   @id @unique @default(uuid())
-  locationId String
-  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
 
 model Employee {
   id                       String                     @id @unique @default(uuid())
   projectedHour            Float                      @default(0)
-  qrCode                   String                     @unique
   timestamps               CheckInOut[]
   formula                  String                     @default("")
   userId                   String                     @unique
   user                     User                       @relation(fields: [userId], references: [id])
   created_at               DateTime                   @default(now())
   updated_at               DateTime                   @updatedAt
-  employeePayroll          EmployeePayroll[]
-  automatedEmployeePayroll AutomatedEmployeePayroll[]
+  Payroll          Payroll[]
 }
+
+
 
 model CheckInOut {
   id             String    @id @unique @default(uuid())
@@ -60,75 +52,25 @@ model CheckInOut {
   remark     String?
 }
 
-model Location {
-  id                      String                     @id @unique @default(uuid())
-  image                   String?
-  name                    String
-  budget                  Float                      @default(0)
-  employees               UserLocation[]
-  payrollPeriods          PayrollLocation[]
-  automatedpayrollPeriods AutomatedPayrollLocation[]
-}
 
 model PayrollPeriod {
   id        String            @id @unique @default(uuid())
   startDate DateTime
   endDate   DateTime
-  locations PayrollLocation[]
+   Payroll          Payroll[]
 }
 
-model PayrollLocation {
-  id         String            @id @unique @default(uuid())
-  payrollId  String
-  payroll    PayrollPeriod     @relation(fields: [payrollId], references: [id])
-  locationId String?
-  location   Location?         @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  budget     Float
-  employees  EmployeePayroll[]
-}
 
-model EmployeePayroll {
+
+model Payroll {
   id               String          @id @unique @default(uuid())
   employeeId       String
   employee         Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   payrollId        String
-  payroll          PayrollLocation @relation(fields: [payrollId], references: [id])
+  payroll          PayrollPeriod @relation(fields: [payrollId], references: [id])
   confirmation     Boolean         @default(false)
   earnings         Float           @default(0)
   totalWorkedHours Float           @default(0)
-  remark           String?
-  confirmed_at     DateTime?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
-
-model AutomatedPayrollPeriod {
-  id        String                     @id @unique @default(uuid())
-  startDate DateTime
-  endDate   DateTime
-  locations AutomatedPayrollLocation[]
-}
-
-model AutomatedPayrollLocation {
-  id         String                     @id @unique @default(uuid())
-  payrollId  String
-  payroll    AutomatedPayrollPeriod     @relation(fields: [payrollId], references: [id])
-  locationId String?
-  location   Location?                  @relation(fields: [locationId], references: [id])
-  budget     Float
-  employees  AutomatedEmployeePayroll[]
-}
-
-model AutomatedEmployeePayroll {
-  id               String                   @id @unique @default(uuid())
-  employeeId       String
-  employee         Employee                 @relation(fields: [employeeId], references: [id])
-  payrollId        String
-  payroll          AutomatedPayrollLocation @relation(fields: [payrollId], references: [id])
-  confirmation     Boolean                  @default(false)
-  earnings         Float                    @default(0)
-  totalWorkedHours Float                    @default(0)
   remark           String?
   confirmed_at     DateTime?
 

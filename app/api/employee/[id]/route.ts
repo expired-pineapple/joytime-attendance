@@ -17,11 +17,8 @@ export async function GET(request: NextRequest,  { params }: { params: { id: str
                 id: id
             },
             include: {
-                user: {
-                    include:{
-                        location:true
-                    }
-                }
+                user: true
+                  
             }
         });
 
@@ -48,49 +45,25 @@ export async function GET(request: NextRequest,  { params }: { params: { id: str
         const result = await db.$transaction(async (tx) => {
             const existingEmployee = await tx.employee.findUnique({
                 where: { id },
-                include: { user: { include: { location: true } } },
+                include: { user:true },
             });
 
             if (!existingEmployee) {
                 throw new Error("Employee not found");
             }
 
-            const { user: userData, locations, ...employeeData } = body;
+            const { user: userData, ...employeeData } = body;
            
-            // Prepare user update data
             const userUpdateData: any = {
                 ...userData,
             };
-            const userLocation = userUpdateData.location;
-            delete userUpdateData.location;
-            
-            // Handle locations update
-            if (Array.isArray(userLocation) && userLocation.length > 0) {
-                // First, delete all existing locations for this user
-                await tx.userLocation.deleteMany({
-                    where: { userId: existingEmployee.user.id }
-                });
 
-                // Then, create new locations
-                userUpdateData.location = {
-                    create: userLocation.map((locationId: string) => ({
-                        // @ts-ignore
-                        locationId: locationId.locationId
-                    }))
-                };
-            }
-
-            delete userUpdateData.locationId
-
-            // Update user
             const updatedUser = await tx.user.update({
                 where: { id: existingEmployee.user.id },
                 data: userUpdateData,
-                include: { location: true }
+              
             });
 
-            delete employeeData.userId
-            // Update employee
             const updatedEmployee = await tx.employee.update({
                 where: { id },
                 data: {
@@ -131,11 +104,6 @@ export async function GET(request: NextRequest,  { params }: { params: { id: str
 
             await tx.checkInOut.deleteMany({
                 where: {employeeId : employee.id }
-            });
-
-            // Delete related UserLocation entries
-            await tx.userLocation.deleteMany({
-                where: { userId: employee.user.id }
             });
 
             // Delete the employee

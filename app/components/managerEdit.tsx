@@ -14,16 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import axios from 'axios'; 
-import { Location } from "@/app/types";
+
 
 interface Props {
   id: string;
@@ -37,17 +29,13 @@ const ManagerEditForm: React.FC<Props> = ({ id, sheetOpen, onChange, onSuccess }
     user: {
       employeeNumber: "",
       name: "",
-      location: [] as { locationId: string }[],
     },
     formula: ""
   });
 
   const [editFetchLoading, setEditFetchLoading] = useState(true);
-  const [editLocation, setEditLocation] = useState<Location[]>([]); 
-  const [editLocationLoading, setEditLocationLoading] = useState(false);
   const [editSuccess, setEditSuccess] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
 
   const { toast } = useToast();
 
@@ -57,7 +45,6 @@ const ManagerEditForm: React.FC<Props> = ({ id, sheetOpen, onChange, onSuccess }
       const res = await axios.get(`/api/employee/${id}`);
       if (res.status === 200) {
         setEditformData(res.data);
-        setSelectedLocations(res.data.user.location?.map((loc: { locationId: string }) => loc.locationId));
       } else if (res.status === 401) {
         window.location.href = "/login";
       }
@@ -93,7 +80,6 @@ const ManagerEditForm: React.FC<Props> = ({ id, sheetOpen, onChange, onSuccess }
           ...editformData,
           user: {
             ...editformData.user,
-            location: selectedLocations?.map(locationId => ({ locationId })),
           },
         });
         if (res.status === 200) {
@@ -119,31 +105,6 @@ const ManagerEditForm: React.FC<Props> = ({ id, sheetOpen, onChange, onSuccess }
     }
   };
 
-  const handleLocationChange = (locationId: string) => {
-    setSelectedLocations(prev => 
-      prev.includes(locationId) ? prev.filter(id => id !== locationId) : [...prev, locationId]
-    );
-  };
-
-  useEffect(() => {
-    const fetchLocationData = async () => {
-      setEditLocationLoading(true);
-      try {
-        const response = await fetch('/api/configs/location');
-        const data = await response.json();
-        setEditLocation(data.locations);
-      } catch (error) {
-        console.error('Error fetching locations:', error);
-        toast({
-          description: "Failed to fetch locations",
-          variant: "destructive",
-        });
-      } finally {
-        setEditLocationLoading(false);
-      }
-    };
-    fetchLocationData();
-  }, []);
 
   useEffect(() => {
     if (id) {
@@ -191,39 +152,6 @@ const ManagerEditForm: React.FC<Props> = ({ id, sheetOpen, onChange, onSuccess }
               (e) => setEditformData({ ...editformData, user: { ...editformData.user, name: e.target.value } }))
             }
            
-          </div>
-          <div className="flex justify-between items-center mb-4 gap-4">
-            <Label htmlFor="locations" className="text-right">
-              Locations
-            </Label>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full bg-transparent">
-                  {selectedLocations.length > 0 
-                    ? `${selectedLocations.length} selected`
-                    : "Select locations"}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 max-h-[300px] overflow-y-auto">
-                <DropdownMenuLabel>Locations</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {editLocationLoading ? (
-                  <DropdownMenuLabel>Loading...</DropdownMenuLabel>
-                ) : editLocation?.length === 0 ? (
-                  <DropdownMenuLabel>No location found</DropdownMenuLabel>
-                ) : (
-                  editLocation?.map((location) => (
-                    <DropdownMenuCheckboxItem
-                      key={location.id}
-                      checked={selectedLocations.includes(location.id)}
-                      onCheckedChange={() => handleLocationChange(location.id)}
-                    >
-                      {location.name}
-                    </DropdownMenuCheckboxItem>
-                  ))
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
           <SheetFooter>
             <SheetClose asChild>
