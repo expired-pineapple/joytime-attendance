@@ -312,7 +312,7 @@ const deleteEmployee = async () => {
       header: () => <div className="text-center">Status</div>,
       cell: ({ row }) => {
         const banned =  row.original.user.isBanned;
-        return <div className= {banned ? "border border-red-500 px-2 py-1 mx-auto rounded-full bg-red-50/50 text-red-700 font-medium text-center text-xs" : "border border-emerald-500 px-2 py-1 mx-auto rounded-full bg-emerald-50/50 text-emerald-700 font-medium text-center  text-xs"}>
+        return <div className= {banned ? "border border-red-500 px-2 py-1 mx-auto rounded-full bg-red-50/50 text-red-700 font-medium text-center text-xs dark:bg-transparent" : "border border-emerald-500 px-2 py-1 mx-auto rounded-full bg-emerald-50/50 text-emerald-400 font-semibold text-center  text-xs dark:bg-transparent"}>
           {banned ? "Banned" : "Active"}
         </div>;
       },
@@ -373,8 +373,6 @@ const deleteEmployee = async () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-full flex-col">
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <div className="flex items-center">
             <div className="ml-auto flex items-center gap-2">
@@ -561,7 +559,5 @@ Password
             </AlertDialogContent>
           </AlertDialog> 
         </main>
-      </div>
-    </div>
   );
 }

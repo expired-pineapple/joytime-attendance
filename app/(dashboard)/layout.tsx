@@ -4,6 +4,8 @@ import "../globals.css";
 import SideBar from "../components/sidebar";
 import { Toaster } from "@/components/ui/toaster"
 import getCurrentUser from "../actions/getCurrentUser";
+import Topnav from "@/app/components/topnav";
+import { Provider } from "./themeprovider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,13 +23,23 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex min-h-screen flex-col bg-muted/40">
-          <SideBar admin={user?.isAdmin} manager={user?.isManager} />
-          <div className="flex flex-col md:gap-4 ">
-            {children}
-            <Toaster />
+        <Provider>
+          <div className="flex relative">
+            <div className="lg:w-[14%] fixed z-50">
+              <SideBar admin={user?.isAdmin} manager={user?.isManager} />
+            </div>
+            <div className="bg-muted/40 dark:bg-neutral-900 p-4  sm:px-10 lg:ml-[14%] w-full">
+              <div className="">
+                <Topnav />
+              </div>
+              <div className="min-h-screen mt-[3%]">
+                {children}
+              </div>
+              
+              <Toaster />
+            </div>
           </div>
-        </div>
+        </Provider>
       </body>
     </html>
   );
