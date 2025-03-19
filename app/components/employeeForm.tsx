@@ -43,11 +43,15 @@ const EmployeeForm: React.FC<Props> = ({isManager, onSuccess}) => {
         saveUserData(e)
       }
 
+      useEffect(()=>{
+        onSuccess()
+      }, [success])
+
     
     return(
         <Sheet>
         <SheetTrigger asChild>
-          <Button size="sm" className="h-7 gap-1 bg-[#865EFD]">
+          <Button size="sm" className="h-7 gap-1">
             <PlusCircle className="h-3.5 w-3.5" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
               Add Employee
